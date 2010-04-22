@@ -1,5 +1,5 @@
 ;;;; auto-async-byte-compile.el --- Automatically byte-compile when saved
-;; Time-stamp: <2010-04-23 06:19:12 rubikitch>
+;; Time-stamp: <2010-04-23 06:29:26 rubikitch>
 
 ;; Copyright (C) 2010  rubikitch
 
@@ -24,7 +24,11 @@
 
 ;;; Commentary:
 ;;
-;; 
+;; Automatically byte-comple elisp files ASYNCHRONOUSLY when saved.
+;; It invokes "emacs -Q --batch --eval '(setq load-path ...)'
+;; -l ~/.emacs.d/initfuncs.el -f batch-byte-compile this-file.el"
+;;
+;; If you define your own macros, put them into ~/.emacs.d/initfuncs.el first.
 
 ;;; Commands:
 ;;
@@ -62,6 +66,8 @@
 ;; And the following to your ~/.emacs startup file.
 ;;
 ;; (require 'auto-async-byte-compile)
+;; (setq auto-async-byte-compile-exclude-files-regexp "/junk/")
+;; (add-hook 'emacs-lisp-mode-hook 'enable-auto-async-byte-compile-mode)
 ;;
 ;; No need more.
 
@@ -116,6 +122,9 @@ This minor-mode performs `batch-byte-compile' automatically after saving elisp f
   (if auto-async-byte-compile-mode
       (add-hook 'after-save-hook 'auto-async-byte-compile nil 'local)
     (remove-hook 'after-save-hook 'auto-async-byte-compile 'local)))
+
+(defun enable-auto-async-byte-compile-mode ()
+  (auto-async-byte-compile-mode 1))
 
 (defun auto-async-byte-compile ()
   "Byte-compile this file asynchronously."
