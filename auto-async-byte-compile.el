@@ -1,5 +1,5 @@
 ;;;; auto-async-byte-compile.el --- Automatically byte-compile when saved
-;; Time-stamp: <2010-04-23 06:29:26 rubikitch>
+;; Time-stamp: <2010-04-23 16:22:01 rubikitch>
 
 ;; Copyright (C) 2010  rubikitch
 
@@ -139,18 +139,20 @@ This minor-mode performs `batch-byte-compile' automatically after saving elisp f
     (erase-buffer))
   (set-process-sentinel
         (apply 'start-process
-               "auto-async-byte-compile" aabc/result-buffer
+               (format "auto-async-byte-compile %s"
+                       (file-name-nondirectory buffer-file-name))
+               aabc/result-buffer
                (aabc/byte-compile-start-process-args buffer-file-name))
         'aabc/process-sentinel))
 
 (defun aabc/process-sentinel (proc state)
   (let ((status (aabc/status (process-exit-status proc) aabc/result-buffer)))
-    (aabc/display-function (process-buffer proc) status)
+    (aabc/display-function (process-name proc) (process-buffer proc) status)
     (run-hooks 'auto-async-byte-compile-hook)))
 
-(defun aabc/display-function (result-buffer status)
+(defun aabc/display-function (process-name result-buffer status)
   (if (eq status 'normal)
-      (message "auto-async-byte-compile %s completed" buffer-file-name)
+      (message "%s completed" process-name)
     (funcall auto-async-byte-compile-display-function result-buffer)))
 
 (defun aabc/status (exitstatus buffer)
